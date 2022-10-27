@@ -13,6 +13,8 @@
 namespace BackOfficePath\Form;
 
 use BackOfficePath\BackOfficePath;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
 use Thelia\Core\Translation\Translator;
@@ -36,7 +38,7 @@ class Configuration extends BaseForm
         $form
             ->add(
                 'back_office_path',
-                'text',
+                TextType::class,
                 array(
                     'constraints' => array(
                         new NotBlank(),
@@ -67,7 +69,7 @@ class Configuration extends BaseForm
             )
             ->add(
                 'back_office_path_default_enabled',
-                'checkbox',
+                CheckboxType::class,
                 array(
                     'data' => intval(ConfigQuery::read('back_office_path_default_enabled', '')) === 1,
                     'label' => Translator::getInstance()->trans(
@@ -90,7 +92,7 @@ class Configuration extends BaseForm
     /**
      * @return string the name of you form. This name must be unique
      */
-    public function getName()
+    public static function getName(): string
     {
         return 'backofficepath';
     }

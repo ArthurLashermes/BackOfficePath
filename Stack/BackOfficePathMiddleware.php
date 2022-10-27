@@ -45,9 +45,9 @@ class BackOfficePathMiddleware implements HttpKernelInterface
         $this->container = $container;
     }
     
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    public function handle(Request $request, $type = HttpKernelInterface::MAIN_REQUEST, $catch = true):\Symfony\Component\HttpFoundation\Response
     {
-        if ($type === HttpKernelInterface::MASTER_REQUEST) {
+        if ($type === HttpKernelInterface::MAIN_REQUEST) {
             $prefix = ConfigQuery::read(BackOfficePath::CONFIG_PATH);
             $defaultEnabled = (int) ConfigQuery::read(BackOfficePath::CONFIG_USE_DEFAULT_PATH, 1);
             $pathInfo = $request->getPathInfo();

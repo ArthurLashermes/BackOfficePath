@@ -13,6 +13,7 @@
 namespace BackOfficePath;
 
 use Propel\Runtime\Connection\ConnectionInterface;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Thelia\Model\ConfigQuery;
 use Thelia\Module\BaseModule;
 
@@ -39,14 +40,14 @@ class BackOfficePath extends BaseModule
     /** @var string Request attribute key to determine if custom admin path is in use */
     const IS_CUSTOM_ADMIN_PATH = 'is_custom_admin_path';
 
-    public function preActivation(ConnectionInterface $con = null)
+    public function preActivation(ConnectionInterface $con = null): bool
     {
         $prefix = ConfigQuery::read(self::CONFIG_PATH);
         if ($prefix === null) {
             ConfigQuery::write(self::CONFIG_PATH, '', false, true);
         }
 
-        $enabled = ConfigQuery::read(self::CONFIG_USE_DEFAULT_PATH, null);
+        $enabled = ConfigQuery::read(self::CONFIG_USE_DEFAULT_PATH);
 
         if ($enabled === null) {
             ConfigQuery::write(self::CONFIG_USE_DEFAULT_PATH, true, false, true);
@@ -64,23 +65,29 @@ class BackOfficePath extends BaseModule
      *
      * @return string Content with replaced urls
      */
-    public static function replaceUrl($content, $oldPrefix, $newPrefix)
+    public static function replaceUrl($content, $oldPrefix, $newPrefix): string
     {
-        $replacedUrl = preg_replace(
+        return preg_replace(
             '#(.*?)/' . preg_quote($oldPrefix, '#') . '(.*?)#',
             '$1/' . $newPrefix . '$2',
             $content
         );
-    
-        return $replacedUrl;
+    }
+
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR.ucfirst(self::getModuleCode()).'/I18n/*'])
+            ->autowire()
+            ->autoconfigure();
     }
     
-    public static function matchPath($path, $prefix)
+    public static function matchPath($path, $prefix): bool
     {
         return preg_match("/^\/".preg_quote($prefix, '/')."(\/.*$|$)/", $path) === 1;
     }
     
-    public static function matchUrl($path, $prefix)
+    public static function matchUrl($path, $prefix): bool
     {
         return preg_match("/\/".preg_quote($prefix, '/')."(\/.*$|$)/", $path) === 1;
     }
